@@ -16,6 +16,7 @@ public class Worker {
 
         Channel channel = conexao.createChannel();
         channel.queueDeclare(TASK_QUEUE_NAME, false, false, false, null);
+        System.out.println("[*] Aguardando mensagens. Para sair, pressione CTRL + C");
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String mensagem = new String (delivery.getBody (), "UTF-8");
