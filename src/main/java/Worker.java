@@ -5,18 +5,21 @@ import com.rabbitmq.client.DeliverCallback;
 
 public class Worker {
 
-    private static final String TASK_QUEUE_NAME = "task_queue";
+    private static final String TASK_QUEUE_NAME = "teste";
 
     public static void main(String[] args) throws Exception {
         System.out.println("Worker");
 
         ConnectionFactory connectionFactory = new ConnectionFactory();
         connectionFactory.setHost("localhost");
+        connectionFactory.setPort(5672);
         Connection conexao = connectionFactory.newConnection();
 
         Channel channel = conexao.createChannel();
-        channel.queueDeclare(TASK_QUEUE_NAME, false, false, false, null);
+        channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
         System.out.println("[*] Aguardando mensagens. Para sair, pressione CTRL + C");
+
+        channel.basicQos(1);
 
         DeliverCallback deliverCallback = (consumerTag, delivery) -> {
             String mensagem = new String (delivery.getBody (), "UTF-8");
@@ -26,6 +29,7 @@ public class Worker {
                 doWork(mensagem);
             } finally {
                 System.out.println ("[x] Feito");
+                channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             }
         };
         boolean autoAck = true;
